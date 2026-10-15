@@ -5,9 +5,20 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+
+  // Allow CommonJS imports in image-generation scripts.
+  {
+    files: [
+      "scripts/generate-favicons.js",
+      "scripts/transparent-logo.js",
+    ],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
+
   // Override default ignores of eslint-config-next.
   globalIgnores([
-    // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
     "build/**",
