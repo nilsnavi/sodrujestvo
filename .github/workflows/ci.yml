@@ -1,22 +1,93 @@
 name: CI
+
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - develop
+      - "feature/**"
+
   pull_request:
-    branches: [main]
+
 permissions:
   contents: read
+
 jobs:
-  verify:
+  quality:
+    name: Quality and Build
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
           cache: npm
-      - run: npm ci
-      - run: npm run lint
-      - run: npx tsc --noEmit
-      - run: npm run build
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: TypeScript
+        run: npx --no-install tsc --noEmit
+
+      - name: ESLint
+        run: npm run lint
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Production build
+        run: npm run build
+
+  integration:
+    name: PostgreSQL Integration
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+
+        env:
+          POSTGRES_USER: sodrujestvo
+          POSTGRES_PASSWORD: ci_test_password
+          POSTGRES_DB: sodrujestvo_test
+
+        ports:
+          - 5433:5432
+
+        options: >-
+          --health-cmd "pg_isready -U sodrujestvo -d sodrujestvo_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://sodrujestvo:ci_test_password@localhost:5433/sodrujestvo_test
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npm run db:generate
+
+      - name: Apply migrations
+        run: npx --no-install prisma migrate deploy
+
+      - name: Integration tests
+        run: npx --no-install vitest run --config vitest.integration.config.mts

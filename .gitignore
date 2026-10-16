@@ -85,3 +85,5 @@ storybook-static/
 
 # sentry
 .sentryclirc
+
+/src/generated/prisma
