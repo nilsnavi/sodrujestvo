@@ -8,6 +8,10 @@ try {
     # Activate isolated test database configuration.
     . "$PSScriptRoot\use-test-database.ps1"
 
+    if ([string]::IsNullOrWhiteSpace($env:DATABASE_URL)) {
+        throw "ОШИБКА: DATABASE_URL не задан. Проверьте конфигурацию .env"
+    }
+
     $DatabaseUri = [System.Uri]::new($env:DATABASE_URL)
 
     # Safety guard: integration tests must never target production.
