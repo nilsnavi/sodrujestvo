@@ -182,4 +182,3 @@ describe("authenticateUser", () => {
     ).rejects.toThrow("Database unavailable");
   });
 });
-
