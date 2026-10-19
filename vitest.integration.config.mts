@@ -8,9 +8,7 @@ export default defineConfig({
     include: ["src/**/*.integration.test.ts"],
 
     clearMocks: true,
-
     fileParallelism: false,
-
     maxWorkers: 1,
   },
 

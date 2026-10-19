@@ -87,3 +87,4 @@ storybook-static/
 .sentryclirc
 
 /src/generated/prisma
+/.next-auth-test/
