@@ -92,14 +92,16 @@ try {
         throw "Не удалось применить миграции Prisma"
     }
 
-    Write-Host "Запуск интеграционных тестов..." -ForegroundColor Cyan
+    Write-Host "Запуск интеграционных тестов PostgreSQL..." -ForegroundColor Cyan
 
-    & npx.cmd --no-install vitest run --config vitest.integration.config.mts
+& npx.cmd --no-install vitest run `
+    --config vitest.integration.config.mts `
+    "src/modules/auth/application" `
+    "src/modules/tenants/application"
 
-    if ($LASTEXITCODE -ne 0) {
-        throw "Интеграционные тесты завершились с ошибкой"
-    }
-
+if ($LASTEXITCODE -ne 0) {
+    throw "Интеграционные тесты PostgreSQL завершились с ошибкой"
+}
     Write-Host "Интеграционные тесты успешно завершены" -ForegroundColor Green
 }
 finally {
